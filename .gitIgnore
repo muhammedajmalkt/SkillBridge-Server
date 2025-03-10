@@ -1,0 +1,46 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.log
+
+# Environment variables
+.env
+.env.test
+.env.production
+.env.local
+
+# Dependency directories
+bower_components/
+jspm_packages/
+
+# Build output
+dist/
+coverage/
+.DS_Store
+*.tsbuildinfo
+
+# Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS-specific files
+Thumbs.db
+.DS_Store
+
+# Misc
+*.bak
