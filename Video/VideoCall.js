@@ -1,37 +1,40 @@
-exports.videoCall= (io)=>{
-io.on("connection", (socket) => {
-  console.log("New user connected:", socket.id);
+exports.videoCall = (io) => {
+  const onlineUsers = new Map(); // Maps userId to socketId
 
-  // Send the client's socket ID
-  socket.emit("me", socket.id);
+  io.on("connection", (socket) => {
+    console.log(`User connected: ${socket.id}`);
 
-  // Handle call initiation
-  socket.on("callUser", ({ userToCall, signalData, from }) => {
-    io.to(userToCall).emit("callIncoming", { from, signal: signalData });
+    socket.on("user_connected", (userId) => {
+      onlineUsers.set(userId, socket.id);
+      io.emit("online_users", Array.from(onlineUsers.keys())); // Broadcast online users
+      console.log(`User ${userId} mapped to socket ${socket.id}`);
+
+      // Auto-start call when two users are online
+      const users = Array.from(onlineUsers.keys());
+      if (users.length === 2) {
+        const [caller, receiver] = users;
+        console.log(`Auto-starting call between ${caller} and ${receiver}`);
+        io.to(onlineUsers.get(caller)).emit("start_call", { to: receiver });
+        io.to(onlineUsers.get(receiver)).emit("start_call", { to: caller });
+      }
+    });
+
+    socket.on("signal", (data) => {
+      console.log(`Forwarding signal from ${socket.id} to ${data.to}:`, data);
+      data.from = socket.id;
+      const recipientSocketId = onlineUsers.get(data.to);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit("signal", data);
+      }
+    });
+
+    socket.on("disconnect", () => {
+      const userId = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
+      if (userId) {
+        onlineUsers.delete(userId);
+        io.emit("online_users", Array.from(onlineUsers.keys())); // Update online list
+        console.log(`User ${userId} disconnected`);
+      }
+    });
   });
-
-  // Handle call answer
-  socket.on("answerCall", ({ to, answer }) => {
-    if (!answer) {
-      console.error("Missing SDP answer");
-      return;
-    }
-    io.to(to).emit("callAccepted", answer);
-  });
-
-  // Handle ICE candidate exchange
-  socket.on("sendIceCandidate", ({ to, candidate }) => {
-    io.to(to).emit("receiveIceCandidate", { candidate });
-  });
-
-  // Handle call ending
-  socket.on("endCall", ({ to }) => {
-    io.to(to).emit("callEnded");
-  });
-
-  // Handle user disconnection
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
-}
+};

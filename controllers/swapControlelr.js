@@ -61,9 +61,7 @@ exports.createSwap = async(req,res)=>{
 exports.getSwap = async (req, res) => {
     const { page = 1, limit = 12, offeredTitle = "", offeredCategory = "" } = req.query;
     const skip = (page - 1) * limit;
-    let filter = { isDeleted: false ,};
-    // filter.assessedUser = { $in: [null, "", []] };
-
+    let filter = { isDeleted: false ,assessedUser :null};
     if (offeredTitle) {
         filter.offeredTitle = { $regex: offeredTitle, $options: "i" };
     }
@@ -99,6 +97,15 @@ exports.swapById =async(req,res) =>{
 
 // get all swapSkill by UserID
 exports.getSwapByUserId = async(req,res)=>{
+    const userId =req.user.userId    
+    const swapSkills = await Swap.find({userId,isDeleted:false,assessedUser:null}).sort({updatedAt:-1})
+    if(!swapSkills){
+        return res.status(404).json({success:false,message:"Skill Swap not found !"})
+    }
+    res.status(200).json({success:true,message: "Successfully founded", data:swapSkills})
+}
+// get all swapSkill by UserID for profile
+exports.getSkillForProfile = async(req,res)=>{
     const userId =req.user.userId    
     const swapSkills = await Swap.find({userId,isDeleted:false}).sort({updatedAt:-1})
     if(!swapSkills){

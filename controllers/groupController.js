@@ -38,7 +38,34 @@ exports.groupJoin= async(req,res)=>{
 
 //get group
 exports.getGroup = async(req,res)=>{
-    const allgroup = await Group.find().sort({createdAt:1})
-
+    const allgroup = await Group.find().sort({createdAt:1})  
     res.status(200).json({success:true,data:allgroup})
+}
+
+//getGrpMembers
+exports.viewAllMembers = async (req,res)=>{
+    const { groupId } = req.params;
+    const group = await Group.findById(groupId).populate("members");
+    if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+    }
+    res.status(200).json({ data: group.members ,admin :group.createdBy});
+}
+
+//grpExit
+exports.grpExit = async(req,res)=>{
+    const {groupId ,userId} =req.body    
+    const group = await Group.findById(groupId)
+    if (!group) {
+        return res.status(404).json({ message: "Group not found" });  
+    } 
+    if (group.createdBy.toString() === userId) {
+        return res.status(400).json({ message: "Group creator cannot leave the group." });
+    }
+    const updatedGroup = await Group.findByIdAndUpdate(
+        groupId,
+        { $pull: { members: userId } },
+        { new: true }
+    )
+    res.status(200).json({succses:true})
 }

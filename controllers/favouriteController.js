@@ -18,7 +18,7 @@ exports.addToFavourite = async (req,res)=>{
 
 exports.getFavourite = async (req, res) => {
         const { userId } = req.user;
-        const wishlist = await Favourite.findOne({ userId }).populate('favouriteSkills');
+        const wishlist = await Favourite.findOne({ userId , assessedUser :null}).populate('favouriteSkills');
         if (!wishlist) return res.status(404).json({ message: 'Favourite not found' });
         res.status(200).json({success:true,data:wishlist});
   

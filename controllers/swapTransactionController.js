@@ -12,11 +12,29 @@ exports.createSwapTransaction = async(req,res,io)=>{
       }
     if(requesterUserId === receiverUserId) {
       return res.status(400).json({success:false,message:"Cannot swap skills with yourself. Please select a different user."})
-    } 
-    // const existingSwap = await SwapTransaction.findById(requesterSkillId)
-    // if(existingSwap){
-    //   return  res.status(400).json({success:false,message:"Skill already swaped"})
-    // }
+    }    
+   const existingRequest = await SwapTransaction.findOne({
+      $or: [
+          { 
+              "requesterSkill.0.userId": requesterUserId, 
+              "receiverSkill.0.userId": receiverUserId, 
+              "requesterSkill.0.skillId": requesterSkillId, 
+              "receiverSkill.0.skillId": receiverSkillId,
+              isPending: true 
+          },
+          { 
+              "requesterSkill.0.userId": receiverUserId, 
+              "receiverSkill.0.userId": requesterUserId, 
+              "requesterSkill.0.skillId": receiverSkillId, 
+              "receiverSkill.0.skillId": requesterSkillId,
+              isPending: true 
+          }
+      ]
+  });
+
+  if (existingRequest) {
+      return res.status(400).json({ message: "You have already sent a request  to this Skill." });
+  }
    const newTransaction = new SwapTransaction({
     requesterSkill:[{userId:requesterUserId,skillId:requesterSkillId}],
     receiverSkill:[{userId:receiverUserId,skillId:receiverSkillId}]

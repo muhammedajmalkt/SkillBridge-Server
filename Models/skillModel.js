@@ -106,7 +106,8 @@ const swapSchema = new mongoose.Schema({
     ],
     assessedUser:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
+        ref:"User",
+        default:null
     },
     score:{
         type:Number,

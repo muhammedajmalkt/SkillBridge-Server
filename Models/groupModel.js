@@ -17,10 +17,14 @@ const groupSchema = new mongoose.Schema({
         "others"],
         default:""
     },
-    createdBy:{type:mongoose.Schema.Types.ObjectId,ref:"User",required:true},
-    members:[{type:mongoose.Schema.Types.ObjectId,ref:"User"}]
+    createdBy:{type:mongoose.Schema.Types.ObjectId,ref:"User"},
+    members:[{type:mongoose.Schema.Types.ObjectId,ref:"User"}],
+    // messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }], // Messages
+
 
 },{timestamps:true})
 
 const Group = mongoose.model("Group",groupSchema)
 module.exports = Group
+
+

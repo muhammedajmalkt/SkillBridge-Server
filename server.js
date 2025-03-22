@@ -16,6 +16,7 @@ const chatRouter = require("./Routers/chatRouter")
 const groupRouter = require("./Routers/groupRouter")
 const favouriteRouter = require("./Routers/favouriteRouter")
 const { videoCall } = require("./Video/VideoCall")
+const { groupSocket } = require("./Sockets/groupSocket")
 
 
 app.use(express.json())
@@ -42,6 +43,7 @@ app.use((req,res,next)=>{
 notificationSocket(io)
 chatSocket(io)
 videoCall(io)
+groupSocket(io)
 
 
 mongoose.connect(process.env.MONGO_URI)
